@@ -3,17 +3,18 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="BICI_Psoc_workspace" persistent="BICI_Psoc_workspace.cywrk" platform="NOT_USED">
-<current_project name=".\ProximalBack_V3.cydsn\ProximalBack_V3.cyprj" />
+<current_project name=".\Palm_V3.cydsn\Palm_V3.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\Fingertip_V3_acc.cydsn\Fingertip_V3_acc.cyprj</v>
 <v>.\I2C_Bootloader.cydsn\I2C_Bootloader.cyprj</v>
-<v>.\BOH_V3.cydsn\BOH_V3.cyprj</v>
 <v>.\MedialBack_V3.cydsn\MedialBack_V3.cyprj</v>
 <v>.\MedialFront_V3.cydsn\MedialFront_V3.cyprj</v>
 <v>.\ProximalFront_V3.cydsn\ProximalFront_V3.cyprj</v>
 <v>.\ProximalBack_V3.cydsn\ProximalBack_V3.cyprj</v>
+<v>.\Palm_V3.cydsn\Palm_V3.cyprj</v>
+<v>.\BOH_V3.cydsn\BOH_V3.cyprj</v>
 </projects>
 <workspace_id v="fbd90070-3a54-402a-8c05-de546c08aac5" />
 <WriteAppVersionLastSavedWith v="4.4.0.80" />
