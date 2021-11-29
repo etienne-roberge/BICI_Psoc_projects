@@ -881,7 +881,7 @@
         <Data key="Port Format" value="3,0" />
       </Group>
       <Group key="12">
-        <Data key="Port Format" value="3,4" />
+        <Data key="Port Format" value="3,1" />
       </Group>
       <Group key="13">
         <Data key="Port Format" value="0,5" />
@@ -889,7 +889,7 @@
     </Group>
     <Group key="1b8ad445-8bbe-4871-a25e-8c437d8b280f/0453aae5-9633-4f00-947c-6145e1bc0c9b">
       <Group key="0">
-        <Data key="Port Format" value="3,1" />
+        <Data key="Port Format" value="3,4" />
       </Group>
       <Group key="1">
         <Data key="Port Format" value="2,7" />
