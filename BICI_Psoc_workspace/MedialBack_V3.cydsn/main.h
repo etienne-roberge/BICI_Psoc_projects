@@ -13,7 +13,7 @@
 #include "project.h"
 #include <stdbool.h>
 
-#define TAXEL_COUNT         (67)
+#define TAXEL_COUNT         (31)
 #define READY_READ          (0xFFFE)
 #define WAITING_FOR_MASTER  (0)
 #define SLAVE_STATE_BYTE    (0)

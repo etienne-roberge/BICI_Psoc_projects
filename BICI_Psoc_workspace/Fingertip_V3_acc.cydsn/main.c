@@ -1,97 +1,109 @@
-/******************************************************************************
-* File Name: main.c
-*
-* Version 1.0
-*
-* Description: This project is to demonstrate how get the CapSense data over I2C.
-*  Tuner GUI is used to display slider position. The I2C component is used to 
-*  establish communication with Tuner GUI.
-*
-* Related Document: CE195286_PSoC4_CapSense_Tuner.pdf
-*
-* Hardware Dependency: CY8CKIT-042-BLE PSoC 4 BLE Pioneer Kit
-*
-*******************************************************************************
-* Copyright (2018), Cypress Semiconductor Corporation. All rights reserved.
-*******************************************************************************
-* This software, including source code, documentation and related materials
-* (“Software”), is owned by Cypress Semiconductor Corporation or one of its
-* subsidiaries (“Cypress”) and is protected by and subject to worldwide patent
-* protection (United States and foreign), United States copyright laws and
-* international treaty provisions. Therefore, you may use this Software only
-* as provided in the license agreement accompanying the software package from
-* which you obtained this Software (“EULA”).
-*
-* If no EULA applies, Cypress hereby grants you a personal, nonexclusive,
-* non-transferable license to copy, modify, and compile the Software source
-* code solely for use in connection with Cypress’s integrated circuit products.
-* Any reproduction, modification, translation, compilation, or representation
-* of this Software except as specified above is prohibited without the express
-* written permission of Cypress.
-*
-* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
-* reserves the right to make changes to the Software without notice. Cypress
-* does not assume any liability arising out of the application or use of the
-* Software or any product or circuit described in the Software. Cypress does
-* not authorize its products for use in any products where a malfunction or
-* failure of the Cypress product may reasonably be expected to result in
-* significant property damage, injury or death (“High Risk Product”). By
-* including Cypress’s product in a High Risk Product, the manufacturer of such
-* system or application assumes all risk of such use and in doing so agrees to
-* indemnify Cypress against all liability. 
-*******************************************************************************/
-#include "project.h"
+/* ========================================
+ *
+ * Copyright YOUR COMPANY, THE YEAR
+ * All Rights Reserved
+ * UNPUBLISHED, LICENSED SOFTWARE.
+ *
+ * CONFIDENTIAL AND PROPRIETARY INFORMATION
+ * WHICH IS THE PROPERTY OF your company.
+ *
+ * ========================================
+*/
+#include <main.h>
 
-/*******************************************************************************
-* Function Name: main
-********************************************************************************
-* Summary:
-*  System entrance point. This function starts the CapSense Component and I2C
-*  Component and sends CapSense data to Tuner application.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  int
-*
-*******************************************************************************/
-int main()
-{
-    /* Enable global interrupts. */
-    __enable_irq();     
+int main(void)
+{    
+    CyGlobalIntEnable;
+    __enable_irq(); /* Enable global interrupts. */
     
-    /* Start EZI2C Component */
-    EZI2C_Start(); 
+    /* Start the I2C Slave */
+    I2C_I2CSlaveInitReadBuf ((uint8 *)i2cReadBuffer, sizeof(i2cReadBuffer));
+    I2C_I2CSlaveInitWriteBuf(i2cWriteBuffer, WRITE_BUFFER_SIZE);
+    I2C_Start();
     
-    /* 
-    *  Set up communication and initialize data buffer to CapSense data structure
-    *  to use Tuner application 
-    */
-    EZI2C_EzI2CSetBuffer1(sizeof(CapSense_dsRam), sizeof(CapSense_dsRam), \
-                            (uint8_t *)&(CapSense_dsRam));
+    //Start capsenses
+    CapSense_Start();
+    CapSense_ScanAllWidgets();
+    
+    uint8 readCapSenseFlag = 0;
 
-    /* Initialize CapSense Component */
-    CapSense_Start(); 
-    
-    /* Scan all widgets */
-    CapSense_ScanAllWidgets(); 
     for(;;)
     {
-        /* Do this only when a scan is done */
-        if(CapSense_NOT_BUSY == CapSense_IsBusy())
+        /* Write complete: parse the command packet */
+        if (0u != (I2C_I2CSlaveStatus() & I2C_I2C_SSTAT_WR_CMPLT))
         {
-            /* Process all widgets */
-            CapSense_ProcessAllWidgets();
+            /* Check the packet length */
+            if (WRITE_BUFFER_SIZE == I2C_I2CSlaveGetWriteBufSize())
+            {
+                /* Check the start and end of packet markers */
+                if(i2cWriteBuffer[0] == 1)
+                {   
+                    i2cReadBuffer[SLAVE_STATE_BYTE] = WAITING_FOR_MASTER;
+                    readCapSenseFlag = 1;
+                }
+                i2cWriteBuffer[0] = 0 ;
+            }
             
-            /* To sync with Tuner application */
-            CapSense_RunTuner(); 
-            
-            /* Start next scan */
-            CapSense_ScanAllWidgets(); 
+            /* Clear the slave write buffer and status */
+            I2C_I2CSlaveClearWriteBuf();
+            (void) I2C_I2CSlaveClearWriteStatus();       
         }
+        
+        //REceived call to read the capsense
+        if(readCapSenseFlag == 1)
+        {
+            if(!CapSense_IsBusy())
+            {
+                CapSense_ProcessAllWidgets();
+                CapSense_RunTuner();
+                CapSense_ScanAllWidgets(); 
+            
+                //for(unsigned int i=0; i<TAXEL_COUNT; ++i)
+                //{
+                //    i2cReadBuffer[i+1] = CapSense_dsRam.snsList.button0[i].raw[0];
+                //}
+                
+                for(unsigned int i=0; i<9; ++i) // Rows0-1
+                {
+                    i2cReadBuffer[i+1] = CapSense_dsRam.snsList.row0[i].raw[0]; 
+                    i2cReadBuffer[i+10] = CapSense_dsRam.snsList.row1[i].raw[0]; 
+                }
+                for(unsigned int i=0; i<7; ++i) // Row2
+                {
+                    i2cReadBuffer[i+19] = CapSense_dsRam.snsList.row2[i].raw[0]; 
+                }
+                for(unsigned int i=0; i<5; ++i) // Row3
+                {
+                    i2cReadBuffer[i+26] = CapSense_dsRam.snsList.row3[i].raw[0]; 
+                }
+                for(unsigned int i=0; i<4; ++i) // Rows4-12
+                {
+                    i2cReadBuffer[i+31] = CapSense_dsRam.snsList.row4[i].raw[0]; 
+                    i2cReadBuffer[i+35] = CapSense_dsRam.snsList.row5[i].raw[0]; 
+                    i2cReadBuffer[i+39] = CapSense_dsRam.snsList.row6[i].raw[0]; 
+                    i2cReadBuffer[i+43] = CapSense_dsRam.snsList.row7[i].raw[0]; 
+                    i2cReadBuffer[i+47] = CapSense_dsRam.snsList.row8[i].raw[0]; 
+                    i2cReadBuffer[i+51] = CapSense_dsRam.snsList.row9[i].raw[0]; 
+                    i2cReadBuffer[i+55] = CapSense_dsRam.snsList.row10[i].raw[0]; 
+                    i2cReadBuffer[i+59] = CapSense_dsRam.snsList.row11[i].raw[0]; 
+                    i2cReadBuffer[i+63] = CapSense_dsRam.snsList.row12[i].raw[0]; 
+                }
+                
+                
+                i2cReadBuffer[SLAVE_STATE_BYTE] = READY_READ;
+                readCapSenseFlag = WAITING_FOR_MASTER;
+            }
+        }
+        
+        
+        /* Read complete*/
+        if (0u != (I2C_I2CSlaveStatus() & I2C_I2C_SSTAT_RD_CMPLT))
+        {
+            /* Clear the slave read buffer and status */
+            I2C_I2CSlaveClearReadBuf();
+            (void) I2C_I2CSlaveClearReadStatus();
+        }
+        
     }
 }
 
