@@ -83,7 +83,7 @@ int main(void)
                     i2cReadBuffer[i+51] = CapSense_dsRam.snsList.row5[i].raw[0];  
                     i2cReadBuffer[i+57] = CapSense_dsRam.snsList.row6[i].raw[0];
                 }
-                for(unsigned int i=0; i<5; ++i) // Row7-10
+                for(unsigned int i=0; i<4; ++i) // Row7-10
                 {
                     i2cReadBuffer[i+63] = CapSense_dsRam.snsList.row7[i].raw[0];  
                     i2cReadBuffer[i+67] = CapSense_dsRam.snsList.row8[i].raw[0];  

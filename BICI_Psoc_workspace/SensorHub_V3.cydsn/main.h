@@ -43,8 +43,8 @@ uint16 sensorAddrList[] =
      0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16};
 
 uint16 nbTaxelList[] = 
-    {67, 28, 28, 28, 79, 67, 31, 31, 31, 79, 67, 
-     66, 66, 66, 79, 67, 6, 6, 6, 6, 122, 119};
+    {70, 28, 28, 28, 79, 70, 31, 31, 31, 79, 70, 
+     66, 66, 66, 79, 70, 6, 6, 6, 6, 122, 119};
     
 uint32 readSensor(const SensorInfoStruct* sensor);
 uint32 startCapSenseAcquisition();

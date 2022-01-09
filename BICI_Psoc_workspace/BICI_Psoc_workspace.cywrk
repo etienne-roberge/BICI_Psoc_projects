@@ -3,7 +3,7 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="BICI_Psoc_workspace" persistent="BICI_Psoc_workspace.cywrk" platform="NOT_USED">
-<current_project name=".\MedialBack_V3.cydsn\MedialBack_V3.cyprj" />
+<current_project name=".\Fingertip_V3_acc.cydsn\Fingertip_V3_acc.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>

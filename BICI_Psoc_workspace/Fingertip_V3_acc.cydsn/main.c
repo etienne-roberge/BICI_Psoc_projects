@@ -11,6 +11,78 @@
 */
 #include <main.h>
 
+
+float X_out, Y_out, Z_out;
+uint32 initAccel()
+{
+    uint32 status = TRANSFER_ERROR;
+    
+    (void) I2CM_I2CMasterClearStatus();
+    
+    uint32 aaa = I2CM_I2CMasterSendStart(ACC_ADDRESS,I2CM_I2C_WRITE_XFER_MODE, 0);
+   
+    if(I2CM_I2C_MSTR_NO_ERROR == aaa)
+    {
+         aaa = I2CM_I2CMasterWriteByte(POWER_ALT,0);
+         if(I2CM_I2C_MSTR_NO_ERROR == aaa)
+         {
+            aaa = I2CM_I2CMasterWriteByte(8,0);
+            if(I2CM_I2C_MSTR_NO_ERROR == aaa)
+            {
+              status = TRANSFER_CMPLT;
+            }
+         }
+    }
+    I2CM_I2CMasterSendStop(0);
+    return (status);     
+}
+
+uint32 readAccel()
+{
+    uint8  buffer[1];
+    uint32 status = TRANSFER_ERROR;
+
+    buffer[0] = 0x32;
+    
+    (void) I2CM_I2CMasterClearStatus();
+    
+    uint32 aaa=I2CM_I2CMasterWriteBuf(ACC_ADDRESS, buffer, 1, I2CM_I2C_MODE_COMPLETE_XFER);
+   
+    if(I2CM_I2C_MSTR_NO_ERROR == aaa)
+    {
+        
+        while (0u == (I2CM_I2CMasterStatus() & I2CM_I2C_MSTAT_WR_CMPLT))
+        {
+            /* Wait */
+        }
+        
+            uint8 sensorValueBuffer[6];
+    
+            aaa=I2CM_I2CMasterReadBuf(ACC_ADDRESS, sensorValueBuffer, sizeof(sensorValueBuffer), I2CM_I2C_MODE_COMPLETE_XFER);
+            
+            if(I2CM_I2C_MSTR_NO_ERROR ==  aaa)
+            {
+                /* If I2C read started without errors, 
+                / wait until master complete read transfer */
+                while (0u == (I2CM_I2CMasterStatus() & I2CM_I2C_MSTAT_RD_CMPLT))
+                {
+                    /* Wait */
+                }
+                X_out = ( sensorValueBuffer[0] | sensorValueBuffer[1] << 8); // X-axis value
+                //X_out = X_out/265.0;
+                Y_out = ( sensorValueBuffer[2] | sensorValueBuffer[3] << 8); // Y-axis value
+                //Y_out = Y_out/265.0;
+                Z_out = ( sensorValueBuffer[4] | sensorValueBuffer[5] << 8); // Z-axis value
+                //Z_out = Z_out/256.0;
+                I2CM_I2CMasterSendStop(0);
+                status = TRANSFER_CMPLT;
+            }
+       
+         
+    }
+    return (status);     
+}
+
 int main(void)
 {    
     CyGlobalIntEnable;
@@ -21,11 +93,20 @@ int main(void)
     I2C_I2CSlaveInitWriteBuf(i2cWriteBuffer, WRITE_BUFFER_SIZE);
     I2C_Start();
     
+    /* Start the I2C Master */
+    I2CM_Start();
+    
     //Start capsenses
     CapSense_Start();
     CapSense_ScanAllWidgets();
     
     uint8 readCapSenseFlag = 0;
+    while(TRANSFER_CMPLT != initAccel())
+    {
+        CyDelay(500u);
+    }
+    CyDelay(10u);
+
 
     for(;;)
     {
@@ -87,6 +168,17 @@ int main(void)
                     i2cReadBuffer[i+55] = CapSense_dsRam.snsList.row10[i].raw[0]; 
                     i2cReadBuffer[i+59] = CapSense_dsRam.snsList.row11[i].raw[0]; 
                     i2cReadBuffer[i+63] = CapSense_dsRam.snsList.row12[i].raw[0]; 
+                }
+                for(unsigned int i=0; i<1; ++i) // Proxi
+                {
+                    i2cReadBuffer[i+67] = CapSense_dsRam.snsList.proxi[i].raw[0]; 
+                } 
+                
+                if(TRANSFER_CMPLT == readAccel()){
+                    
+                    i2cReadBuffer[68] = X_out;
+                    i2cReadBuffer[69] = Y_out;
+                    i2cReadBuffer[70] = Z_out;
                 }
                 
                 
