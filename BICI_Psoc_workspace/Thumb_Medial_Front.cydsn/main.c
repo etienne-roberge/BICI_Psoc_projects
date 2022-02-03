@@ -63,37 +63,26 @@ int main(void)
                 //    i2cReadBuffer[i+1] = CapSense_dsRam.snsList.button0[i].raw[0];
                 //}
                 
-                for(unsigned int i=0; i<10; ++i) // Row0
+                for(unsigned int i=0; i<6; ++i) // Rows0
                 {
-                    i2cReadBuffer[i+1] = CapSense_dsRam.snsList.row0[i].raw[0];  
+                    i2cReadBuffer[i+1] = CapSense_dsRam.snsList.row0[i].raw[0]; 
+                }
+                for(unsigned int i=0; i<7; ++i) // Row1-2
+                {
+                    i2cReadBuffer[i+7] = CapSense_dsRam.snsList.row1[i].raw[0];
+                    i2cReadBuffer[i+14] = CapSense_dsRam.snsList.row2[i].raw[0];
+                }
+                for(unsigned int i=0; i<3; ++i) // Row3-5
+                {
+                    i2cReadBuffer[i+21] = CapSense_dsRam.snsList.row3[i].raw[0];
+                    i2cReadBuffer[i+24] = CapSense_dsRam.snsList.row4[i].raw[0];
+                    i2cReadBuffer[i+27] = CapSense_dsRam.snsList.row5[i].raw[0];
+                }
+                for(unsigned int i=0; i<2; ++i) // Row6
+                {
+                    i2cReadBuffer[i+30] = CapSense_dsRam.snsList.row6[i].raw[0];
                 }
                 
-                for(unsigned int i=0; i<9; ++i) // Row1-2
-                {
-                    i2cReadBuffer[i+11] = CapSense_dsRam.snsList.row1[i].raw[0];  
-                    i2cReadBuffer[i+20] = CapSense_dsRam.snsList.row2[i].raw[0];  
-                }
-                for(unsigned int i=0; i<11; ++i) // Row3-4
-                {
-                    i2cReadBuffer[i+29] = CapSense_dsRam.snsList.row3[i].raw[0];  
-                    i2cReadBuffer[i+40] = CapSense_dsRam.snsList.row4[i].raw[0];  
-                }
-                for(unsigned int i=0; i<6; ++i) // Row5-6
-                {
-                    i2cReadBuffer[i+51] = CapSense_dsRam.snsList.row5[i].raw[0];  
-                    i2cReadBuffer[i+57] = CapSense_dsRam.snsList.row6[i].raw[0];
-                }
-                for(unsigned int i=0; i<4; ++i) // Row7-10
-                {
-                    i2cReadBuffer[i+63] = CapSense_dsRam.snsList.row7[i].raw[0];  
-                    i2cReadBuffer[i+67] = CapSense_dsRam.snsList.row8[i].raw[0];  
-                    i2cReadBuffer[i+71] = CapSense_dsRam.snsList.row9[i].raw[0];  
-                    i2cReadBuffer[i+75] = CapSense_dsRam.snsList.row10[i].raw[0];  
-                }
-                for(unsigned int i=0; i<1; ++i) // Proxi
-                {
-                    i2cReadBuffer[i+79] = CapSense_dsRam.snsList.proxi[i].raw[0];  
-                }
                 
                 i2cReadBuffer[SLAVE_STATE_BYTE] = READY_READ;
                 readCapSenseFlag = WAITING_FOR_MASTER;
