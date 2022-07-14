@@ -13,7 +13,7 @@
 #include "project.h"
 #include <stdbool.h>
 
-#define TAXEL_COUNT         (28)
+#define TAXEL_COUNT         (27)
 #define I2C_SLAVE_ADDRESS1  (0x18u)
 #define I2C_SLAVE_ADDRESS2  (I2C_SLAVE_ADDRESS1+(0x40u))
 #define DATA_READY          (0x01)

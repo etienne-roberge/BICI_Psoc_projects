@@ -15,17 +15,17 @@ void copyDataToI2CBuffer()
 {                  
     for(unsigned int i=0; i<4; ++i) // Rows0-2
     {
-        sensorStruct.sensorsList[i+1] = CapSense_dsRam.snsList.row0[i].raw[0]; 
-        sensorStruct.sensorsList[i+5] = CapSense_dsRam.snsList.row1[i].raw[0];
-        sensorStruct.sensorsList[i+9] = CapSense_dsRam.snsList.row2[i].raw[0];
+        sensorStruct.sensorsList[i] = CapSense_dsRam.snsList.row0[i].raw[0]; 
+        sensorStruct.sensorsList[i+4] = CapSense_dsRam.snsList.row1[i].raw[0];
+        sensorStruct.sensorsList[i+8] = CapSense_dsRam.snsList.row2[i].raw[0];
     }
     for(unsigned int i=0; i<3; ++i) // Row3-7
     {
-        sensorStruct.sensorsList[i+13] = CapSense_dsRam.snsList.row3[i].raw[0];
-        sensorStruct.sensorsList[i+16] = CapSense_dsRam.snsList.row4[i].raw[0];
-        sensorStruct.sensorsList[i+19] = CapSense_dsRam.snsList.row5[i].raw[0];
-        sensorStruct.sensorsList[i+22] = CapSense_dsRam.snsList.row6[i].raw[0];
-        sensorStruct.sensorsList[i+25] = CapSense_dsRam.snsList.row7[i].raw[0];
+        sensorStruct.sensorsList[i+12] = CapSense_dsRam.snsList.row3[i].raw[0];
+        sensorStruct.sensorsList[i+15] = CapSense_dsRam.snsList.row4[i].raw[0];
+        sensorStruct.sensorsList[i+18] = CapSense_dsRam.snsList.row5[i].raw[0];
+        sensorStruct.sensorsList[i+21] = CapSense_dsRam.snsList.row6[i].raw[0];
+        sensorStruct.sensorsList[i+24] = CapSense_dsRam.snsList.row7[i].raw[0];
     }
 }
 
