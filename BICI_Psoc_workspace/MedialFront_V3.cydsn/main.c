@@ -58,9 +58,9 @@ int main(void)
     sensorStruct.dataReady = DATA_NOT_READY;
     sensorStruct.counterTimer = 0x0000;
     
+    I2C_Start();
     I2C_I2CSlaveSetAddress(I2C_SLAVE_ADDRESS1);
     I2C_SetI2cAddressCustomInterruptHandler(&AddressAccepted);
-    I2C_Start();
     
     Timer_Start();
     

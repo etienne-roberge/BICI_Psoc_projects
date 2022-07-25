@@ -14,7 +14,7 @@
 #include <stdbool.h>
 
 #define TAXEL_COUNT         (78)
-#define I2C_SLAVE_ADDRESS1  (0x1Bu)
+#define I2C_SLAVE_ADDRESS1  (0x0Fu)
 #define I2C_SLAVE_ADDRESS2  (I2C_SLAVE_ADDRESS1+(0x40u))
 #define DATA_READY          (0x01)
 #define DATA_NOT_READY      (0x00)

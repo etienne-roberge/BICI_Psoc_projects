@@ -13,7 +13,7 @@
 
 void copyDataToI2CBuffer()
 {                  
-    for(unsigned int i=0; i<10; ++i) // Row0
+    for(unsigned int i=0; i<10; ++i) // Row
     {
         sensorStruct.sensorsList[i] = CapSense_dsRam.snsList.row0[i].raw[0];  
     }
@@ -71,9 +71,9 @@ int main(void)
     sensorStruct.dataReady = DATA_NOT_READY;
     sensorStruct.counterTimer = 0x0000;
     
+    I2C_Start();
     I2C_I2CSlaveSetAddress(I2C_SLAVE_ADDRESS1);
     I2C_SetI2cAddressCustomInterruptHandler(&AddressAccepted);
-    I2C_Start();
     
     Timer_Start();
     
