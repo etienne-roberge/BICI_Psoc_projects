@@ -15,23 +15,6 @@
 #include <stdlib.h>
 #include "main.h"
 
-uint32 counter = 0; // initialize counter for timestamps
-
-CY_ISR (Timer_Int_Handler)
-{
-    if (Timer_GetInterruptSource() == Timer_INTR_MASK_CC_MATCH)
-    {
-        counter += Timer_ReadCounter(); // add 16-bit timer count to our 32-bit counter
-        Timer_WriteCounter(0); // reset the counter
-        Timer_ClearInterrupt(Timer_INTR_MASK_CC_MATCH); // clear the interrupt
-    }
-
-    if (Timer_GetInterruptSource() == Timer_INTR_MASK_TC)
-    {
-       Timer_ClearInterrupt(Timer_INTR_MASK_TC);
-    }
-    
-}
 
 /*******************************************************************************
 * uint32 readSensor(const SensorInfoStruct* sensor)
@@ -51,7 +34,7 @@ uint32 readSensor(const SensorInfoStruct* sensor)
 {
     uint32 status = TRANSFER_ERROR;
     
-    uint8 sizeToRead = sensor->nbTaxels*2 + 2;
+    uint32 sizeToRead = sensor->nbTaxels*2 + 8; //(4 READY_BYTE + 4 TIME_BYTE)
     
     (void) I2CM_I2CMasterClearStatus();
     
@@ -70,9 +53,8 @@ uint32 readSensor(const SensorInfoStruct* sensor)
         if (0u == (I2CM_I2C_MSTAT_ERR_XFER & I2CM_I2CMasterStatus()))
         {
             /* Check packet structure */
-            if (I2CM_I2CMasterGetReadBufSize() == sizeToRead && 
-                sensorValueBuffer[0] == 0xFE && 
-                sensorValueBuffer[1] == 0xFF)
+            uint32 dataLen =  I2CM_I2CMasterGetReadBufSize();
+            if (dataLen == sizeToRead && sensorValueBuffer[0] == 0x01)
             {
                 status = TRANSFER_CMPLT;
             }
@@ -83,54 +65,6 @@ uint32 readSensor(const SensorInfoStruct* sensor)
         }
     }
     return (status);     
-}
-
-/*******************************************************************************
-* uint32 startCapSenseAcquisition()
-*
-* Hub initiates the transfer to write acquire capsense command packet from all slaves.
-* Command is send via address 0x00 to be received by all slaves
-*
-* Return:
-*  Status of the transfer. There are 2 statuses
-*  - TRANSFER_CMPLT: transfer completed successfully and is valid.
-*  - TRANSFER_ERROR: the error occurred while transfer or.
-*******************************************************************************/
-uint32 startCapSenseAcquisition()
-{
-    uint8  buffer[1];
-    uint32 status = TRANSFER_ERROR;
-
-    buffer[0] = 1;
-    
-
-    (void) I2CM_I2CMasterClearStatus();
-    
-    /* Start I2C write and check status*/
-    if(I2CM_I2C_MSTR_NO_ERROR == I2CM_I2CMasterWriteBuf(0x00,
-                                    buffer, 1,
-                                    I2CM_I2C_MODE_COMPLETE_XFER))
-    {
-        /*If I2C write started without errors, 
-        / wait until I2C Master completes write transfer 
-        */
-        while (0u == (I2CM_I2CMasterStatus() & I2CM_I2C_MSTAT_WR_CMPLT))
-        {
-            /* Wait */
-        }
-        
-        /* Display transfer status */
-        if (0u == (I2CM_I2CMasterStatus() & I2CM_I2C_MSTAT_ERR_XFER))
-        {
-            /* Check if all bytes was written */
-            if (I2CM_I2CMasterGetWriteBufSize() == 1)
-            {
-                status = TRANSFER_CMPLT;
-            }
-        }
-    }
-
-    return (status);
 }
 
 /*******************************************************************************
@@ -181,16 +115,9 @@ void sendDataToUART(const SensorInfoStruct* sensor)
     memset(uartBuffer, 0, UART_BUFFER_SIZE);
     //Insert the sensor id in the first byte of the message
     uartBuffer[0] = sensor->i2cAddr;
-    // trigger counter interrupt to get timestamp 
-    Timer_SetInterrupt( Timer_INTR_MASK_CC_MATCH );
-    // Insert 4 byte timestemp into the message
-    uartBuffer[1] = (uint8)(counter >> 24);
-    uartBuffer[2] = (uint8)(counter >> 16);
-    uartBuffer[3] = (uint8)(counter >> 8);
-    uartBuffer[4] = (uint8) counter;
     
-    memcpy(uartBuffer + MESSAGE_HEADER_SIZE, sensorValueBuffer+2, sensor->nbTaxels*2);
-    comm_putmsg((uint8*)uartBuffer, sensor->nbTaxels*2 + MESSAGE_HEADER_SIZE);
+    memcpy(uartBuffer + SENSOR_TAG_SIZE, sensorValueBuffer + TIME_DATA_SIZE, sensor->nbTaxels*2 + TIME_DATA_SIZE);
+    comm_putmsg((uint8*)uartBuffer, SENSOR_TAG_SIZE + TIME_DATA_SIZE + sensor->nbTaxels*2);
 }
 
 /*******************************************************************************
@@ -223,22 +150,27 @@ void readSensorsValues()
             {
                 done = false;
                 memset(sensorValueBuffer, 0, SENSOR_BUFFER_SIZE);
+                
                 //Try to read sensor
-                if(TRANSFER_CMPLT == readSensor(&sensorList[index]))
-                {
-                    //Success, we send that sensor value to the UART
+                uint32 result = readSensor(&sensorList[index]);
+                if(result == TRANSFER_CMPLT)
+                {                   
                     sendDataToUART(&sensorList[index]);
                     sensorList[index].wasRead = true;
                 }
-                else //can't read sensor, increment number of try. If over 10, remove sensor from list.
+                else// if(result == SLAVE_NOT_READY)//can't read sensor, increment number of try. If over 10, remove sensor from list.
                 //Added a little patch for now (never put sensor offline)
                 {
                     sensorList[index].nbReadTry += 1;
                     if(sensorList[index].nbReadTry >= 5)
                     {
                         sensorList[index].wasRead = true;
-                    }
+                    } 
                 }
+               // else
+                //{
+                //    sensorList[index].isOnline = false;
+                //}
             }
         }
     }
@@ -246,15 +178,10 @@ void readSensorsValues()
     resetSensorsReadStatus();
 }
 
-
 int main(void)
 {
     CyGlobalIntEnable;
     comm_init();
-    
-    /* Start Timer */
-    Timer_Start();
-    Timer_Int_StartEx(Timer_Int_Handler);
 
      /* Start the I2C Master */
     I2CM_Start();
@@ -262,22 +189,12 @@ int main(void)
     initSensorsStructs();
     
     for(;;)
-    {
+    {    
+        readSensorsValues();
         
-        //Send capsense acquisition cmd to all sensors
-        if (TRANSFER_CMPLT == startCapSenseAcquisition())
-        {
-            //Read all sensors and send through UART
-            readSensorsValues();
-        }
         // Delay (ms)
-        CyDelay(50u);
+        CyDelay(10u);
     }
-    
-    // stop timer and associated interrupt
-    Timer_Stop();
-    Timer_Int_Stop();
-    
 }
 
 /* [] END OF FILE */

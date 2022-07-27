@@ -13,14 +13,20 @@
 #include "project.h"
 #include <stdbool.h>
 
-#define TAXEL_COUNT         (122)
-#define READY_READ          (0xFFFE)
-#define WAITING_FOR_MASTER  (0)
-#define SLAVE_STATE_BYTE    (0)
-#define WRITE_BUFFER_SIZE   (1)
+#define TAXEL_COUNT         (121)
+#define I2C_SLAVE_ADDRESS1  (0x15u)
+#define I2C_SLAVE_ADDRESS2  (I2C_SLAVE_ADDRESS1+(0x40u))
+#define DATA_READY          (0x01)
+#define DATA_NOT_READY      (0x00)
 
-/* The I2C Slave read and write buffers */
-uint16 i2cReadBuffer [TAXEL_COUNT+1];
-uint8 i2cWriteBuffer[WRITE_BUFFER_SIZE];
+typedef struct
+{
+    uint8 dataReady;
+    uint32 counterTimer;
+    uint16 sensorsList[TAXEL_COUNT];    
+} SensorStruct;
+
+SensorStruct sensorStruct;
+uint8 activeAddress = 0xFF;
 
 /* [] END OF FILE */

@@ -12,28 +12,28 @@
 #include <main.h>
 
 void copyDataToI2CBuffer()
-{           
-    for(unsigned int i=0; i<66; ++i) // Touchpad0
+{                  
+    for(unsigned int i=0; i<6; ++i) // Rows0
     {
-        sensorStruct.sensorsList[i] = CapSense_dsRam.snsList.touchpad0[i].raw[0];  
+        sensorStruct.sensorsList[i] = CapSense_dsRam.snsList.row0[i].raw[0]; 
     }
-    
-    for(unsigned int i=0; i<42; ++i) // Touchpad1
+    for(unsigned int i=0; i<7; ++i) // Rows1-2
     {
-        sensorStruct.sensorsList[i+66] = CapSense_dsRam.snsList.touchpad1[i].raw[0];  
+        sensorStruct.sensorsList[i+6] = CapSense_dsRam.snsList.row1[i].raw[0]; 
+        sensorStruct.sensorsList[i+13] = CapSense_dsRam.snsList.row2[i].raw[0]; 
     }
-    for(unsigned int i=0; i<4; ++i) // MatrixButtons0
+    for(unsigned int i=0; i<3; ++i) // Rows3-4-5
     {
-        sensorStruct.sensorsList[i+108] = CapSense_dsRam.snsList.matrixbuttons0[i].raw[0];  
+        sensorStruct.sensorsList[i+20] = CapSense_dsRam.snsList.row3[i].raw[0]; 
+        sensorStruct.sensorsList[i+23] = CapSense_dsRam.snsList.row4[i].raw[0]; 
+        sensorStruct.sensorsList[i+26] = CapSense_dsRam.snsList.row5[i].raw[0]; 
     }
-    for(unsigned int i=0; i<4; ++i) // MatrixButtons1
+    for(unsigned int i=0; i<2; ++i) // Rows6
     {
-        sensorStruct.sensorsList[i+112] = CapSense_dsRam.snsList.matrixbuttons1[i].raw[0];  
+        sensorStruct.sensorsList[i+29] = CapSense_dsRam.snsList.row6[i].raw[0]; 
     }
-    for(unsigned int i=0; i<5; ++i) // Button0
-    {
-        sensorStruct.sensorsList[i+116] = CapSense_dsRam.snsList.button0[i].raw[0];  
-    }
+
+
 }
 
 uint32 AddressAccepted(void)

@@ -12,28 +12,34 @@
 #include <main.h>
 
 void copyDataToI2CBuffer()
-{           
-    for(unsigned int i=0; i<66; ++i) // Touchpad0
+{                  
+    for(unsigned int i=0; i<4; ++i) // Rows0
     {
-        sensorStruct.sensorsList[i] = CapSense_dsRam.snsList.touchpad0[i].raw[0];  
+        sensorStruct.sensorsList[i] = CapSense_dsRam.snsList.row0[i].raw[0]; 
     }
-    
-    for(unsigned int i=0; i<42; ++i) // Touchpad1
+    for(unsigned int i=0; i<5; ++i) // Rows1-2-3
     {
-        sensorStruct.sensorsList[i+66] = CapSense_dsRam.snsList.touchpad1[i].raw[0];  
+        sensorStruct.sensorsList[i+4] = CapSense_dsRam.snsList.row1[i].raw[0]; 
+        sensorStruct.sensorsList[i+9] = CapSense_dsRam.snsList.row2[i].raw[0]; 
+        sensorStruct.sensorsList[i+14] = CapSense_dsRam.snsList.row3[i].raw[0];
     }
-    for(unsigned int i=0; i<4; ++i) // MatrixButtons0
+    for(unsigned int i=0; i<7; ++i) // Rows4-5
     {
-        sensorStruct.sensorsList[i+108] = CapSense_dsRam.snsList.matrixbuttons0[i].raw[0];  
+        sensorStruct.sensorsList[i+19] = CapSense_dsRam.snsList.row4[i].raw[0]; 
+        sensorStruct.sensorsList[i+26] = CapSense_dsRam.snsList.row5[i].raw[0]; 
     }
-    for(unsigned int i=0; i<4; ++i) // MatrixButtons1
+    for(unsigned int i=0; i<4; ++i) // Rows6-7
     {
-        sensorStruct.sensorsList[i+112] = CapSense_dsRam.snsList.matrixbuttons1[i].raw[0];  
+        sensorStruct.sensorsList[i+33] = CapSense_dsRam.snsList.row6[i].raw[0]; 
+        sensorStruct.sensorsList[i+37] = CapSense_dsRam.snsList.row7[i].raw[0]; 
     }
-    for(unsigned int i=0; i<5; ++i) // Button0
+    for(unsigned int i=0; i<2; ++i) // Rows8-9-10
     {
-        sensorStruct.sensorsList[i+116] = CapSense_dsRam.snsList.button0[i].raw[0];  
+        sensorStruct.sensorsList[i+41] = CapSense_dsRam.snsList.row8[i].raw[0]; 
+        sensorStruct.sensorsList[i+43] = CapSense_dsRam.snsList.row9[i].raw[0];
+        sensorStruct.sensorsList[i+45] = CapSense_dsRam.snsList.row10[i].raw[0]; 
     }
+
 }
 
 uint32 AddressAccepted(void)
